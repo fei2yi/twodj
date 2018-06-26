@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block body %}
+<form class="form-inline definewidth m20" action="/scr/" method="get">
+    路径：
+    <select name="search" id="search" value="yf">
+        <option value="all">全部</option>
+        {% for a in pathname %}
+            <option value={{a.pathname }} {% if a.pathname == search%}selected="true"{% endif %}>{{a.pathname}}</option>
+        {% endfor %}
+    </select> &nbsp;&nbsp;
+    <button type="submit" class="btn btn-primary">查询</button>&nbsp;&nbsp; <button type="button" class="btn btn-success" id="pull">同步脚本</button>
+</form>
+<table class="table table-bordered table-hover definewidth m10">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>文件夹名称</th>
+        <th>脚本名称</th>
+        <th>脚本概括</th>
+        <th>数据量</th>
+        <th>进度</th>
+        <th>队列剩余</th>
+        <th>同步时间</th>
+        <th>操作</th>
+    </tr>
+     </thead>
+    {% for a in result %}
+    <tr>
+        <td>{{ a.scr.id}}</td>
+        <td>{{a.scr.pathname }}</td>
+        <td>{{a.scr.name }}</td>
+        <td class="epitome" style="width: 30%;" itemid={{ a.scr.id}}>{{a.scr.epitome|default_if_none:""}}</td>
+        <td>{%  if a.scr.urlcount == 0 %}未知{% else %}{{ a.scr.urlcount}}{% endif %}</td>
+        <td>{% if a.rate == -1 %}未运行
+            {% else %}
+            <dd class="barline">
+                <div w={{ a.rate }} style="width:0px;" class="charts"></div>
+            </dd>
+            <div>{{ a.rate }}%</div>
+            {% endif %}
+        </td>
+
+        <td>{{ a.mq }}</td>
+        <td>{{a.scr.createtime }}</td>
+        <td>
+            <a href="/scredit?id={{ a.scr.id }}">详情</a>&nbsp&nbsp&nbsp
+        </td>
+    </tr>
+{% endfor %}
+
+{% endblock %}
+{% block script %}
+    <script>
+     $(function () {
+		$('#pull').click(function(){
+				$.ajax({type: 'POST', url: "/scr/", data: {pull:true,search:$("#search").val()},success:function(){location.reload() ;alert("同步脚本成功!")}});
+
+		});
+    });
+    $(function () {
+		$('#addnew').click(function(){
+				window.location.href="add.html";
+		 });
+    });
+
+	function del(id)
+	{
+		if(confirm("确定要删除吗？"))
+		{
+			var url = "index.html";
+			window.location.href=url;
+		}
+	}
+	function animate(){
+        $(".charts").each(function(i,item){
+            var a=parseInt($(item).attr("w"));
+            $(item).animate({
+                width: a+"%"
+            },1000);
+        });
+    }
+    animate();
+
+	$(".epitome").click(function(event){
+	    if(event.target==this) {
+            $(this).html("<input class='epitomeinput' style='width: 100%;' itemid=" + $(this).attr('itemid') + " value='" + $(this).text() + "' />");
+            $(".epitomeinput").focus();
+        }
+    });
+
+    $(document).on("blur",".epitomeinput",function () {
+        var value=$(this).val();
+        var itemid=$(this).attr("itemid");
+         $(this).parent().html($(this).val());
+         $.ajax({type: 'POST', url: "/epitome/", data:{val:value,id:itemid},success:function(){}});
+    })
+    </script>
+{% endblock %}

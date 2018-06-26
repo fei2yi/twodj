@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block body %}
+
+    <div id="scrname" style="display: none">{{ result.scr.name }}</div>
+    <table >
+        <th>
+            <td width="40%" >脚本名称：&nbsp&nbsp&nbsp{{ result.scr.name }}</td>
+            <td  width="40%">同步时间：&nbsp&nbsp&nbsp{{ result.scr.createtime|date:'Y-m-d H:i:s '}}</td>
+            <td  width="20%">
+               	 <button type="button" class="btn btn-success" name="backid" id="backid">返回列表</button>
+            </td>
+        </th>
+    </table>
+<table>
+    <th>运行脚本：</th>
+</table>
+<form action="/edithost" method="post" class="definewidth m20">
+    <table class="table table-bordered table-hover definewidth m10 " id="table1">
+        <tr>
+            <td width="40%" class="tableleft">主机名称</td>
+            <td width="50%" class="tableleft">运行次数</td>
+            <td width="10%"><input type="button" class="btn btn-primary" onclick="AddRow()" value="增加行"></td>
+        </tr>
+
+        {% for key,val in result.runing.items%}
+            <tr>
+            <td>{{ key }}</td>
+            <td>{{ val}}</td>
+            <td></td>
+            </tr>
+        {% endfor %}
+
+
+{#        <tr>#}
+{#            <td>#}
+{#            </td>#}
+{#            <td>#}
+{#                <input type="text" class="numinput" readonly style="width: 30px" value="0"/>#}
+{#                <input type="range" class= "pointsnum" name="pointsnum" min="1" max="50" value="0" style="width: 90%"/>#}
+{#            </td>#}
+{#             <td>#}
+{#                <input type="button" class="runkey"  value="运行">#}
+{#            </td>#}
+{#        </tr>#}
+    </table>
+
+
+
+</form>
+{% endblock %}
+{% block script %}
+<script>
+    $(function () {
+		$('#backid').click(function(){
+				window.location.href="/scr/";
+		 });
+    });
+    var obj = document.getElementById( "table1" );	//获取表格的ID
+    //增加行
+    function AddRow(  )
+    {
+        var rowCount = obj.rows.length;
+        var tRow = obj.insertRow( rowCount );
+        tRow.insertCell( 0 ).innerHTML='<td> <select name="cars" id=ip'+rowCount+'>{% for a in result.hostser %} <option value={{a.hostIP }}>{{a.hostname}}</option>{% endfor %} </select> </td>';
+        tRow.insertCell( 1 ).innerHTML='<td> <input type="text" class="numinput" id=num'+rowCount+' readonly style="width: 30px" value="0"/> <input type="range" class= "pointsnum" name="pointsnum" min="1" max="50" value="0" style="width: 90%"/> </td>';
+        tRow.insertCell( 2 ).innerHTML='<td> <input type="button" onclick="runscipt('+rowCount+')" value="运行"> </td>';
+    }
+    function runscipt(mrow){
+            scrname= $("#scrname").html();
+            a=$('#ip'+mrow).val();
+            b=$('#num'+mrow).val();
+            $.ajax({type: 'POST', url: "/scrrun/", data: {ip:a,num:b,parname:{{ result.src}},name:scrname},success:function(backstr){console.log(backstr)}});
+		 };
+
+    $(document).on("change", ".pointsnum", function() {
+        $(this).siblings().val($(this).val())
+    });
+
+</script>
+{% endblock %}

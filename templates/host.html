@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block body %}
+<form class="form-inline definewidth m20" action="index.html" method="get">
+    服务器名称：
+    <input type="text" name="username" id="username"class="abc input-default" placeholder="" value="">&nbsp;&nbsp;
+    <button type="submit" class="btn btn-primary">查询</button>&nbsp;&nbsp; <button type="button" class="btn btn-success" id="addnew">新增服务器</button>
+</form>
+<table class="table table-bordered table-hover definewidth m10">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>服务器名称</th>
+        <th>服务器IP</th>
+        <th>部署状态</th>
+        <th>运行状态</th>
+        <th>操作</th>
+    </tr>
+     </thead>
+    {% for a in result.hostser %}
+    <tr>
+        <td>{{ a.id }}</td>
+        <td>{{a.hostname }}</td>
+        <td>{{a.hostIP }}</td>
+        <td>{%  if a.hosttype %}从机{% else %}主机{% endif %}</td>
+        <td>{% if a.hoststatus %}正常{%else%}关机{% endif %}</td>
+        <td><a href="/hostedit?id={{ a.id }}">编辑</a>
+                </td>
+    </tr>
+{% endfor %}
+
+{% endblock %}
+{% block script %}
+    <script>
+    $(function () {
+		$('#addnew').click(function(){
+				window.location.href="/hostadd";
+		 });
+    });
+
+	function del(id)
+	{
+		if(confirm("确定要删除吗？"))
+		{
+			var url = "index.html";
+			window.location.href=url;
+		}
+	}
+    </script>
+{% endblock %}

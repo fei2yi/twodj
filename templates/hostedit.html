@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block body %}
+<form action="/hostedit/" method="post" id="addform" class="definewidth m20">
+<input type="hidden" name="hostid" value="{{ result.hostser.id }}" />
+    <table class="table table-bordered table-hover definewidth m10">
+        <tr>
+            <td width="10%" class="tableleft">主机名称</td>
+            <td><input type="text" name="hostname" value="{{ result.hostser.hostname }}"/></td>
+        </tr>
+        <tr>
+            <td class="tableleft">主机IP</td>
+            <td><input type="text" required id="reg_ip" name="hostIP" value="{{ result.hostser.hostIP }}"/></td>
+        </tr>
+        <td class="tableleft">类型</td>
+            <td>
+                <input type="radio" name="hosttype" value="0" {% if not result.hostser.hosttype %}checked ="true" {% endif %} /> 主机
+              <input type="radio" name="hosttype" value="1" {% if result.hostser.hosttype %}checked ="true" {% endif %} /> 从机
+            </td>
+        <tr>
+            <td class="tableleft">状态</td>
+            <td>
+                <input type="radio" name="hoststatus" value="0" {% if result.hostser.hoststatus %}checked ="true" {% endif %}/> 启用
+              <input type="radio" name="hoststatus" value="1" {% if not result.hostser.hoststatus %}checked ="true" {% endif %}/> 禁用
+            </td>
+        </tr>
+
+        <tr>
+            <td class="tableleft"></td>
+            <td>
+                <button type="button" class="btn btn-primary" id="save">保存</button>
+                &nbsp;&nbsp;&nbsp;
+                <button type="button" class="btn btn-success" name="backid" id="backid">返回列表</button>
+                &nbsp;&nbsp;&nbsp;
+                <button type="button" class="btn btn-del" id ="bushu"type="button">删除</button>
+            </td>
+        </tr>
+    </table>
+</form>
+{% endblock %}
+{% block script %}
+<script>
+
+    $('#backid').click(function(){
+            window.location.href="/host";
+     });
+
+
+
+    $('#save').click(function(){
+            if (f_check_IP()){
+                $('#addform').submit()
+            }
+     });
+
+
+     function f_check_IP()
+    {  var ip = document.getElementById('reg_ip').value;
+       var re=/^(\d+)\.(\d+)\.(\d+)\.(\d+):(\d+)$/;//正则表达式
+       if(re.test(ip))
+       {
+           if( RegExp.$1<256 && RegExp.$2<256 && RegExp.$3<256 && RegExp.$4<256&& RegExp.$5>0)
+           return true;
+       }
+       $('#reg_ip').val("")
+       $('#reg_ip').attr("placeholder","请输入有效的IP地址,如:172.16.203.121");
+       $('#reg_ip').focus();
+       return false;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,9 @@
+#hosttab,#scripttab{
+    border: 1px solid;
+}
+
+#hosttab td,#scripttab td{
+    border: 1px solid;
+    width: 110px;
+    text-align: center;
+}

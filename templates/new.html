@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block link %}
+    <link href="/static/css/bootstrap-overrides.css" type="text/css" rel="stylesheet">
+    <link href="/static/css/bootstrap.css" type="text/css" rel="stylesheet">
+    <link href="/static/css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet">
+    <link href="/static/css/matrix-style.css" type="text/css" rel="stylesheet">
+{% endblock %}
+{% block css2 %}
+    .jctable{width:100%}
+    .jctable tr{}
+    .jctable td{border: 1px dotted;
+    padding: 1px 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    }
+    .jctable th{    font-size: 6px;border: 1px solid;height: 22px;background-color: darkturquoise;}
+    .jctable tr:nth-child(odd){background:#F4F4F4;}
+    .jctable td:nth-child(even){color:#C00;}
+{#    #shuaxin{    width: 49px;right: 10px;position: absolute;border: 1px solid #71b34f; background-image:url('/static/images/timg.jpg')}#}
+    #shuaxin:active {box-shadow: 1px 1px 5px #888888;}
+{% endblock %}
+{% block body %}
+    <div id="content">
+        <div>
+            <h1>{{ result.scr.name }}</h1>
+        </div>
+        <table style="width: 100%">
+            <td width="50%"><select name="cars" style="width: 100px" id="runip">{% for a in result.hostser %}
+                <option value={{ a.hostIP }}>{{ a.hostname }}</option>{% endfor %} </select>
+                <input type="number" id="runnum" style="width: 50px" value="1"/>
+                <button type="button" class="btn btn-success" id="runbut">运行</button>
+            </td>
+            <td width="50%">
+                <button type="button" class="btn btn-success" id="back">返回列表</button>
+                <button type="button" class="btn btn-success" onclick="shuaxin()" id="shuaxin" >刷新</button>
+                <button type="button" class="btn btn-success" onclick="killxc('',{{ id }},1)" id="chongzhi" >强制清除</button>
+            </td>
+        </table>
+
+        <div class="container-fluid" style="padding: 10px;">
+            <hr>
+{#            {% for item in result.runing %}#}
+                <div class="row-fluid">
+                    <div class="span4">
+                        {% for item in result.runing %}
+                        <div class="widget-box">
+                            <div class="widget-title"><span class="icon"> <i class="icon-list"></i> </span>
+                                <h5>{{ item.name }} <code>共计{{ item.count }}个线程</code></h5>（kill子线程会自动重新打开）
+                            </div>
+                            <div class="widget-content">
+                                <table class="jctable">
+                                    <tr>
+                                        <th>线程号</th>
+                                        <th>父级线程</th>
+                                        <th>未知</th>
+                                        <th>未知</th>
+                                        <th style="width: 30%">启动命令</th>
+                                        <th>操作</th>
+                                    </tr>
+
+                                    {% for jc in item.jincheng %}
+                                        <tr id ='xctr{{ jc.0 }}'>
+                                            <td>{{ jc.0 }}</td>
+                                            <td>{{ jc.1 }}</td>
+                                            <td>{{ jc.2 }}</td>
+                                            <td>{{ jc.3 }}</td>
+                                            <td>{{ jc.4 }}</td>
+                                            <td><a href="javascript:void(0)"
+                                                   onclick="killxc('{{ jc.0 }}','{{ item.name }}',0)">kill<a/></td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                    <div class="span4">
+                        <div class="widget-box">
+                            <div class="widget-title"><span class="icon"> <i class="icon-list"></i> </span>
+                               <h5>错误日志</h5> 共计{{result.log.logcount}}条
+                            </div>
+                            <div class="widget-content">
+                                <table class="jctable">
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>主机</th>
+                                        <th>记录</th>
+                                    </tr>
+                                    {% for item in result.log.loglist %}
+                                     <tr>
+                                        <td>{{ item.0 }}</td>
+                                        <td>{{ item.1 }}</td>
+                                        <td>{{ item.2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                               </div>
+                        </div>
+                    </div>
+                    <div class="span4">
+                        <div class="widget-box">
+                            <div class="widget-title"><span class="icon"> <i class="icon-list"></i> </span>
+                                <h5>数据库 <code>数量</code></h5>
+                            </div>
+                            <div class="widget-content">
+                            {% for item in result.db %}
+                                <table class="jctable">
+                                    {% for clu in item %}
+                                        <tr>
+                                            {% for c in clu %}
+                                                <td>{{ c }}</td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+{#            {% endfor %}#}
+        </div>
+    </div>
+
+{% endblock %}
+{% block script %}
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/theme.js"></script>
+    <script>
+        function killxc(id, name,type) {
+            $.ajax({
+                type: 'POST', url: "/killxc/", data: {ip: name, id: id,type:type}, success: function (backstr) {
+                    console.log(backstr);
+                    $('#xctr'+id).remove()
+                }
+            });
+            shuaxin()
+        }
+        $(function () {
+            $('#back').click(function () {
+                window.location.href = "/scr/";
+            });
+        });
+        $('#runbut').click(function()
+        {
+            pathname = "{{ result.scr.pathname }}"
+            scrname = "{{ result.scr.name }}";
+            if (pathname=='root')
+                name=scrname;
+            else
+                name=pathname+'/'+scrname;
+            a = $('#runip').val();
+            b = $('#runnum').val();
+            $.ajax({
+                type: 'POST',
+                url: "/scrrun/",
+                data: {ip: a, num: b, name: name},
+                success: function (backstr) {
+                    console.log(backstr);
+                    alert("运行完成！")
+                }
+            });
+            shuaxin()
+        })
+        function shuaxin() {
+            window.location.href='/scredit/?id={{ id }}'
+        }
+    </script>
+{% endblock %}
