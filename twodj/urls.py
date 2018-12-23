@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'data/(?P<id>\d+)/$', views.data),
     url(r'update', views.update),
+    url(r'login', views.login),
     url(r'index', views.index),
     url(r'hello', views.hello),
     url(r'home', views.home, name='hemo'),
@@ -30,5 +31,6 @@ urlpatterns = [
     url(r'^search-form$', search.search_form),
     url(r'^search$', search.search),
     url(r'^search-post$', search2.search_post),
-
+    url(r'^test_ajax$', views.ajax_submit),
+    url(r'pages/member/list', views.list),
 ]

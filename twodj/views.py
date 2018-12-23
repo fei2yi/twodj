@@ -19,11 +19,24 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 def index(request):
-    return render(request, 'index.html', )
+    return render(request, './index.html', )
 
 
 def home(request):
     return render(request, 'home.html', )
+
+
+def list(request):
+    return render(request, './pages/member/list.html', )
+
+
+def ajax_submit(request):
+    if request.method == "POST":
+        print(request.POST.get("k1"), request.POST.get("k2"))
+        return HttpResponse("ajax_.html")
+    else:
+        # print(request.POST.get("k1"), request.POST.get("k2"))
+        return HttpResponse('ok')
 
 
 def zhaobing(request):
@@ -65,3 +78,7 @@ def data(request, id):
 
 def update(request):
     return render_to_response('update.html')
+
+
+def login(request):
+    return render_to_response('login.html')
